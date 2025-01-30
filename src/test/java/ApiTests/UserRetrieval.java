@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import services.UserService;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -24,19 +26,19 @@ public class UserRetrieval extends ApiTestBase {
         String lastName = "Weaver";
 
         Response response = userService.getUser("2");
-        System.out.println(response.then().extract().headers().toString());
+//        System.out.println(response.then().extract().headers().toString());
 
-        Assertions.assertEquals(response.jsonPath().getInt("data.id"), userId);
-        Assertions.assertEquals(response.jsonPath().getString("data.email"), email);
-        Assertions.assertEquals(response.jsonPath().getString("data.first_name"), firstName);
-        Assertions.assertEquals(response.jsonPath().getString("data.last_name"), lastName);
+        Assertions.assertEquals(userId, response.jsonPath().getInt("data.id"));
+        Assertions.assertEquals(email, response.jsonPath().getString("data.email"));
+        Assertions.assertEquals(firstName, response.jsonPath().getString("data.first_name"));
+        Assertions.assertEquals(lastName, response.jsonPath().getString("data.last_name"));
     }
 
     @Test
     public void listUsers(){
         int page = 1;
         Response response = RestAssured.given()
-                .queryParam("page", page)
+                .queryParam("page", Collections.singleton(page))
                 .when()
                 .get("/api/users")
                 .then()
@@ -46,7 +48,7 @@ public class UserRetrieval extends ApiTestBase {
                 .extract()
                 .response();
 
-        Assertions.assertEquals(response.jsonPath().getInt("page"), page);
+        Assertions.assertEquals(page, response.jsonPath().getInt("page"));
         Assertions.assertNotNull(response.jsonPath().getList("data", User.class), "User data should not be null");
 
         System.out.println("User Id: " + response.jsonPath().getInt("data[0].id"));
@@ -54,7 +56,7 @@ public class UserRetrieval extends ApiTestBase {
 
         List<User> users = response.jsonPath().getList("data", User.class);
 
-        List<User> sorted = users.stream().sorted((u1, u2) -> u1.getFirst_name().compareToIgnoreCase(u2.getFirst_name())).collect(Collectors.toList());
+        List<User> sorted = users.stream().sorted((u1, u2) -> u1.getFirst_name().compareToIgnoreCase(u2.getFirst_name())).toList();
 
         for (User user : sorted) {
             System.out.println(user.getFirst_name() + " " + user.getLast_name());
@@ -69,7 +71,7 @@ public class UserRetrieval extends ApiTestBase {
 
     @Test
     public void getUserDetails(){
-        int userId = 2;
+        Integer userId = Integer.valueOf(2);
         String email = "janet.weaver@reqres.in";
         String firstName = "Janet";
         String lastName = "Weaver";
@@ -84,14 +86,14 @@ public class UserRetrieval extends ApiTestBase {
                 .response();
 
         Assertions.assertEquals(response.jsonPath().getInt("data.id"), userId);
-        Assertions.assertEquals(response.jsonPath().getString("data.email"), email);
-        Assertions.assertEquals(response.jsonPath().getString("data.first_name"), firstName);
-        Assertions.assertEquals(response.jsonPath().getString("data.last_name"), lastName);
+        Assertions.assertEquals(email, response.jsonPath().getString("data.email"));
+        Assertions.assertEquals(firstName, response.jsonPath().getString("data.first_name"));
+        Assertions.assertEquals(lastName, response.jsonPath().getString("data.last_name"));
     }
 
     @Test
     public void getNonExistingUser(){
-        int userId = 44;
+        Integer userId = Integer.valueOf(44);
         Response response = RestAssured.given()
                 .pathParam("userId", userId)
                 .when()

@@ -31,7 +31,7 @@ public class UserCreation extends ApiTestBase {
         System.out.println(response.jsonPath().getString("job"));
 
         Assertions.assertNotNull(response.jsonPath().getString("id"), "Id is null");
-        Assertions.assertEquals(response.jsonPath().getString("name"), "Petar");
-        Assertions.assertEquals(response.jsonPath().getString("job"), "driver");
+        Assertions.assertEquals("Petar", response.jsonPath().getString("name"));
+        Assertions.assertEquals("driver", response.jsonPath().getString("job"));
     }
 }
